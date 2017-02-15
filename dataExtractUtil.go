@@ -21,23 +21,33 @@ var extract_hids = make([]string, 0)
 var lock = sync.RWMutex
 
 // var program_ids = []string{""}
+func isLineNeed(aeskey, line string, hid_index int, date string) bool {
+	_list := strings.Split(line, ",")
+	if len(_list) > hid_index && hid_index >= 0 {
+		return isCollectionIdNeed(aeskey, _list[hid_index], date)
+	}
+	return false
+}
 
 /*
 	初始化需要提取的合集id
 	例如：分类的节目id，SA级，运营重点关注的几个合集，以及top100合集
 */
 func isCollectionIdNeed(aeskey, hid string, date string) bool {
-	lock.Lock()
 	if len(extract_hids) == 0 {
+		lock.Lock()
 		initCollectionIds(date)
+		lock.Unlock()
 	}
-	lock.Unlock()
 	if Contains(extract_hids, hid) {
 		return true
 	}
 	return false
 }
 func initCollectionIds(date string, aeskey string) {
+	if len(extract_hids) != 0 {
+		return
+	}
 	dec_user, _ := AesCBCDecrypte(user, aeskey)
 	dec_host, _ := AesCBCDecrypte(host, aeskey)
 	dec_passwd, _ := AesCBCDecrypte(passwd, aeskey)
@@ -84,6 +94,7 @@ func initCollectionIds(date string, aeskey string) {
 		}
 		extract_hids = append(extract_hids, hid)
 	}
+	// TODO 查询重点资源合集
 }
 
 func getResult(rows sql.Rows) [][]string {
