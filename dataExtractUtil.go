@@ -19,6 +19,23 @@ var dbname = "53547354c18777d63fee16738ba7fbf7"
 
 var extract_hids = make([]string, 0)
 var lock = sync.RWMutex
+var sa_hids = make([]string, 0)
+var imp_hids = make([]string, 0)
+
+func GetHidGroup(aeskey, date, hid string) string {
+	if len(extract_hids) == 0 {
+		lock.Lock()
+		initCollectionIds(date)
+		lock.Unlock()
+	}
+	if Contains(sa_hids, hid) {
+		return "SA"
+	}
+	if Contains(imp_hids, hid) {
+		return "IMP"
+	}
+	return "B"
+}
 
 // var program_ids = []string{""}
 func isLineNeed(aeskey, line string, hid_index int, date string) bool {
@@ -74,6 +91,9 @@ func initCollectionIds(date string, aeskey string) {
 	result := getResult(rows)
 	for _, row := range result {
 		cid := row[1]
+		if !Contains(sa_hids, cid) {
+			sa_hids = append(sa_hids, cid)
+		}
 		if Contains(extract_hids, cid) {
 			continue
 		}
@@ -89,6 +109,9 @@ func initCollectionIds(date string, aeskey string) {
 	result = getResult(rows)
 	for _, row := range result {
 		hid := row[0]
+		if !Contains(imp_hids, hid) {
+			imp_hids = append(imp_hids, hid)
+		}
 		if Contains(extract_hids, hid) {
 			continue
 		}
