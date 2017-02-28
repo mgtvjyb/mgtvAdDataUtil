@@ -1,7 +1,6 @@
 package mgtvAdDataUtil
 
 import (
-	"config"
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
