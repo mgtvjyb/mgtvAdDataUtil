@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -17,14 +16,14 @@ var port = "3c2902cc457e4dcc40e39ca2c7c64c18"
 var dbname = "53547354c18777d63fee16738ba7fbf7"
 
 var extract_hids = make([]string, 0)
-var lock = sync.RWMutex
+var lock sync.RWMutex
 var sa_hids = make([]string, 0)
 var imp_hids = make([]string, 0)
 
 func GetHidGroup(aeskey, date, hid string) string {
 	if len(extract_hids) == 0 {
 		lock.Lock()
-		initCollectionIds(date)
+		initCollectionIds(aeskey, date)
 		lock.Unlock()
 	}
 	if Contains(sa_hids, hid) {
@@ -52,7 +51,7 @@ func isLineNeed(aeskey, line string, hid_index int, date string) bool {
 func isCollectionIdNeed(aeskey, hid string, date string) bool {
 	if len(extract_hids) == 0 {
 		lock.Lock()
-		initCollectionIds(date)
+		initCollectionIds(aeskey, date)
 		lock.Unlock()
 	}
 	if Contains(extract_hids, hid) {
@@ -119,11 +118,11 @@ func initCollectionIds(date string, aeskey string) {
 	// TODO 查询重点资源合集
 }
 
-func getResult(rows sql.Rows) [][]string {
+func getResult(rows *sql.Rows) [][]string {
 	cols, err := rows.Columns()
 	if err != nil {
 		fmt.Println("query mysql error get rows columns", err)
-		return nil, err
+		return nil
 	}
 	values := make([]interface{}, len(cols))
 	for i, _ := range cols {
