@@ -23,7 +23,7 @@ var imp_hids = make([]string, 0)
 func GetHidGroup(aeskey, date, hid string) string {
 	if len(extract_hids) == 0 {
 		lock.Lock()
-		initCollectionIds(aeskey, date)
+		initCollectionIds(date, aeskey)
 		lock.Unlock()
 	}
 	if Contains(sa_hids, hid) {
