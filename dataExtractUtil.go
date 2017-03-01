@@ -39,7 +39,7 @@ func GetHidGroup(aeskey, date, hid string) string {
 func isLineNeed(aeskey, line string, hid_index int, date string) bool {
 	_list := strings.Split(line, ",")
 	if len(_list) > hid_index && hid_index >= 0 {
-		return isCollectionIdNeed(aeskey, _list[hid_index], date)
+		return IsCollectionIdNeed(aeskey, _list[hid_index], date)
 	}
 	return false
 }
@@ -48,10 +48,10 @@ func isLineNeed(aeskey, line string, hid_index int, date string) bool {
 	初始化需要提取的合集id
 	例如：分类的节目id，SA级，运营重点关注的几个合集，以及top100合集
 */
-func isCollectionIdNeed(aeskey, hid string, date string) bool {
+func IsCollectionIdNeed(aeskey, hid string, date string) bool {
 	if len(extract_hids) == 0 {
 		lock.Lock()
-		initCollectionIds(aeskey, date)
+		initCollectionIds(date, aeskey)
 		lock.Unlock()
 	}
 	if Contains(extract_hids, hid) {
@@ -87,6 +87,9 @@ func initCollectionIds(date string, aeskey string) {
 		return
 	}
 	result := getResult(rows)
+	if len(result) == 0 {
+		fmt.Println("get null sabinfo error date:", date)
+	}
 	for _, row := range result {
 		cid := row[1]
 		if !Contains(sa_hids, cid) {
@@ -98,13 +101,16 @@ func initCollectionIds(date string, aeskey string) {
 		extract_hids = append(extract_hids, cid)
 	}
 	// 查top100的合集id
-	top_sql := fmt.Sprintf("select hid from stock_history.hid_req_count order by count desc limit 100")
+	top_sql := fmt.Sprintf("select hid  from stock_history.hid_req_count group by hid order by sum(count) desc limit 100")
 	rows, err = db.Query(top_sql)
 	if err != nil {
 		fmt.Println("get top hid 100 error date:", date, " error: ", err)
 		return
 	}
 	result = getResult(rows)
+	if len(result) == 0 {
+		fmt.Println("get null top 100 error date:", date)
+	}
 	for _, row := range result {
 		hid := row[0]
 		if !Contains(imp_hids, hid) {
