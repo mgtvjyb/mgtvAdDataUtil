@@ -113,7 +113,7 @@ func initCollectionIds(date string, aeskey string) {
 	}
 	for _, row := range result {
 		hid := row[0]
-		if !Contains(imp_hids, hid) {
+		if !Contains(imp_hids, hid) && hid != "0" && !Contains(sa_hids, hid) {
 			imp_hids = append(imp_hids, hid)
 		}
 		if Contains(extract_hids, hid) {
