@@ -32,6 +32,10 @@ func InitRedisClient(addr string, poolSize int, timeout time.Duration, password 
 	return client, err
 }
 
-func (*RedisClient) Del(key string) error {
+func Del(key string) error {
+	if client == nil {
+		fmt.Println("Get redis value, but redis client is nil!")
+		return errors.New("not initied")
+	}
 	return client.Del(key).Err()
 }
