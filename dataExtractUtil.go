@@ -122,7 +122,7 @@ func initCollectionIds(date string, aeskey string) {
 		extract_hids = append(extract_hids, hid)
 	}
 	// TODO 查询重点资源合集
-	imp_sql := fmt.Sprintf("select hid  from stock_history.important_collection group by hid")
+	imp_sql := fmt.Sprintf("select hid  from stock_history.important_collection where status=1 group by hid")
 	rows, err = db.Query(imp_sql)
 	if err != nil {
 		fmt.Println("get important hid error date:", date, " error: ", err)
