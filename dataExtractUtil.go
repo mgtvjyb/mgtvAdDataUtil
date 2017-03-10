@@ -76,7 +76,7 @@ func initCollectionIds(date string, aeskey string) {
 	}
 
 	defer db.Close()
-
+	// 查询sa
 	loc, _ := time.LoadLocation("Local")
 	cur_time, _ := time.ParseInLocation("20060102", date, loc)
 	unix_cur := cur_time.Unix()
@@ -122,6 +122,26 @@ func initCollectionIds(date string, aeskey string) {
 		extract_hids = append(extract_hids, hid)
 	}
 	// TODO 查询重点资源合集
+	imp_sql := fmt.Sprintf("select hid  from stock_history.important_collection group by hid")
+	rows, err = db.Query(imp_sql)
+	if err != nil {
+		fmt.Println("get important hid error date:", date, " error: ", err)
+		return
+	}
+	result = getResult(rows)
+	if len(result) == 0 {
+		fmt.Println("get null important hid error date:", date)
+	}
+	for _, row := range result {
+		hid := row[0]
+		if !Contains(imp_hids, hid) && hid != "0" && !Contains(sa_hids, hid) {
+			imp_hids = append(imp_hids, hid)
+		}
+		if Contains(extract_hids, hid) {
+			continue
+		}
+		extract_hids = append(extract_hids, hid)
+	}
 }
 
 func getResult(rows *sql.Rows) [][]string {
